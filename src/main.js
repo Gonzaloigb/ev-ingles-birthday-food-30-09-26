@@ -12,8 +12,7 @@
 
 import './estilos.css';
 import { ZONAS, CUMPLEANOS } from './datos.js';
-import { el, pintarEstrellas } from './util.js';
-import { imagen } from './dibujos.js';
+import { el, pintarEstrellas, imagen } from './util.js';
 import { despertarAudio, sonarToque } from './audio.js';
 import { iniciarVoz, hayVoz, nombreVoz } from './voz.js';
 import { legible } from './motor.js';

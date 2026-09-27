@@ -20,8 +20,7 @@ import {
   CUMPLEANOS, COMIDAS, OLLA, ORIGENES, PERSONAS, PRIORITARIAS,
   HAVE_YOU_GOT, fraseGusto, palabra, AVISOS,
 } from '../datos.js';
-import { el, barajar, uno, elegirCon } from '../util.js';
-import { imagen } from '../dibujos.js';
+import { el, barajar, uno, elegirCon, imagen } from '../util.js';
 import { correrZona } from '../motor.js';
 import { guardarSimulacro } from '../estado.js';
 

@@ -14,8 +14,7 @@
  */
 
 import { COMIDAS, OLLA, ORIGENES, pistaDeError, AVISOS } from '../datos.js';
-import { el, barajar, uno, elegirCon } from '../util.js';
-import { imagen } from '../dibujos.js';
+import { el, barajar, uno, elegirCon, imagen } from '../util.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;

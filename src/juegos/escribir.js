@@ -14,8 +14,7 @@
  */
 
 import { TODAS, PRIORITARIAS, ERRORES_REALES, palabra, pistaDeError, AVISOS } from '../datos.js';
-import { el, barajar, uno } from '../util.js';
-import { imagen } from '../dibujos.js';
+import { el, barajar, uno, imagen } from '../util.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;

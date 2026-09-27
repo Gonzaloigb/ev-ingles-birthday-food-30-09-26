@@ -395,6 +395,7 @@ input { font-family: inherit; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: var(--papel);
   border: 4px solid var(--azul-borde);
@@ -851,12 +852,6 @@ input { font-family: inherit; }
 .emoji { font-size: clamp(38px, 11vw, 58px); line-height: 1.1; }
 .emoji.grande { font-size: clamp(54px, 16vw, 86px); }
 
-/* Dibujo propio (crisps, potatoes): ocupa el mismo lugar que un emoji, para
-   que una fila mezclada no quede despareja. */
-.dibujo { display: block; line-height: 0; }
-.dibujo .dib { width: clamp(56px, 15.5vw, 82px); height: auto; display: block; }
-.dibujo.grande .dib { width: clamp(78px, 23vw, 120px); }
-
 .tarjeta-emoji {
   background: var(--papel);
   border: 4px solid var(--azul-borde);
@@ -1172,8 +1167,6 @@ input { font-family: inherit; }
   /* --- Emojis y frases: ceden alto, que es lo escaso --- */
   .emoji { font-size: 36px; }
   .emoji.grande { font-size: 52px; }
-  .dibujo .dib { width: 52px; }
-  .dibujo.grande .dib { width: 74px; }
   .tarjeta-emoji { padding: 9px 16px; }
   .frase-hueco { padding: 12px 14px; font-size: 20px; }
   .frase-hueco .hueco { min-width: 56px; }

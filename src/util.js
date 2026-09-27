@@ -76,3 +76,13 @@ export function confeti(cantidad = 60) {
     setTimeout(() => p.remove(), 5200);
   }
 }
+
+/**
+ * La imagen de una palabra: su emoji.
+ * @param {object} p     entrada del vocabulario (con .emoji)
+ * @param {boolean} big  si true, tamano grande (tarjeta de una sola imagen)
+ */
+export function imagen(p, big = false) {
+  if (!p.emoji) throw new Error(`Falta el emoji de: ${p.en}`);
+  return `<span class="emoji${big ? ' grande' : ''}">${p.emoji}</span>`;
+}
