@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Probar la voz en inglés</title>
+<style>
+  body{font-family:'Segoe UI',system-ui,sans-serif;max-width:760px;margin:0 auto;
+       padding:30px 20px;line-height:1.6;color:#0F172A;background:#EFF6FF}
+  h1{font-size:26px;margin-bottom:6px}
+  .sub{color:#475569;margin-bottom:22px}
+  .caja{background:#fff;border:3px solid #C7DAFC;border-radius:16px;
+        padding:20px;margin-bottom:16px}
+  .ok{border-color:#16A34A;background:#DCFCE7}
+  .mal{border-color:#DC2626;background:#FEE2E2}
+  button{font:inherit;font-weight:700;background:#2563EB;color:#fff;border:none;
+         border-radius:999px;padding:12px 26px;cursor:pointer;margin:4px 4px 4px 0;
+         min-height:46px}
+  button:hover{background:#1D4ED8}
+  button.gris{background:#fff;color:#0F172A;border:2px solid #C7DAFC}
+  #lista{font-size:15px;max-height:230px;overflow:auto;margin-top:10px}
+  #lista div{padding:5px 0;border-bottom:1px solid #E2E8F0}
+  code{background:#F1F5F9;padding:2px 7px;border-radius:5px;font-size:14px}
+  .grande{font-size:19px;font-weight:700}
+</style>
+</head>
+<body>
+  <h1>🔊 Probar la voz en inglés</h1>
+  <p class="sub">Esta página comprueba si este navegador puede leer en inglés,
+     que es lo que necesita la parte auditiva del juego.</p>
+
+  <div class="caja" id="estado">
+    <p class="grande">Comprobando…</p>
+  </div>
+
+  <div class="caja">
+    <p class="grande">Prueba de sonido</p>
+    <p>Toca los botones. Deberías escuchar las palabras <b>en inglés</b>.</p>
+    <button onclick="hablar('sheep')">sheep</button>
+    <button onclick="hablar('chicken')">chicken</button>
+    <button onclick="hablar('There are 7 sheep.')">There are 7 sheep.</button>
+    <button onclick="hablar(&quot;It's got a beak.&quot;)">It's got a beak.</button>
+    <button class="gris" onclick="hablar('sheep', true)">🐢 sheep (lento)</button>
+  </div>
+
+  <div class="caja">
+    <p class="grande">Voces instaladas en este navegador</p>
+    <div id="lista">Cargando…</div>
+  </div>
+
+<script>
+var vozElegida = null;
+
+function mejorVoz(lista){
+  var ingles = lista.filter(function(v){ return /^en(-|_)/i.test(v.lang); });
+  if(!ingles.length) return null;
+  var pref = [/Aria/i,/Jenny/i,/Michelle/i,/Guy/i,/Zira/i,/David/i];
+  for(var i=0;i<pref.length;i++){
+    for(var j=0;j<ingles.length;j++){
+      if(pref[i].test(ingles[j].name)) return ingles[j];
+    }
+  }
+  for(var k=0;k<ingles.length;k++){
+    if(/^en-US/i.test(ingles[k].lang)) return ingles[k];
+  }
+  return ingles[0];
+}
+
+function revisar(){
+  var todas = speechSynthesis.getVoices();
+  if(!todas.length) return;
+
+  var ingles = todas.filter(function(v){ return /^en(-|_)/i.test(v.lang); });
+  vozElegida = mejorVoz(todas);
+
+  var caja = document.getElementById('estado');
+  if(vozElegida){
+    caja.className = 'caja ok';
+    caja.innerHTML = '<p class="grande">✅ Todo listo</p>' +
+      '<p>Hay <b>' + ingles.length + '</b> voces en inglés. El juego usará:<br>' +
+      '<code>' + vozElegida.name + ' (' + vozElegida.lang + ')</code></p>';
+  } else {
+    caja.className = 'caja mal';
+    caja.innerHTML = '<p class="grande">⚠️ No hay voz en inglés</p>' +
+      '<p>Este navegador tiene ' + todas.length + ' voces, pero ninguna en inglés.<br>' +
+      'Prueba abriendo esta página en <b>Microsoft Edge</b>.</p>';
+  }
+
+  var lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  todas.forEach(function(v){
+    var d = document.createElement('div');
+    var esIngles = /^en(-|_)/i.test(v.lang);
+    d.innerHTML = (esIngles ? '🇬🇧 ' : '· ') + v.name +
+                  ' <code>' + v.lang + '</code>' +
+                  (v === vozElegida ? ' <b>← la que usará el juego</b>' : '');
+    if(esIngles) d.style.fontWeight = '600';
+    lista.appendChild(d);
+  });
+}
+
+function hablar(texto, lento){
+  if(!vozElegida){ alert('No hay voz en inglés disponible.'); return; }
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(texto);
+  u.voice = vozElegida;
+  u.lang = vozElegida.lang || 'en-US';
+  u.rate = lento ? 0.6 : 0.82;
+  u.pitch = 1.05;
+  speechSynthesis.speak(u);
+}
+
+speechSynthesis.addEventListener('voiceschanged', revisar);
+revisar();
+setTimeout(revisar, 800);
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Compila el juego y lo publica en GitHub Pages en cada push.
+#
+# Por que hace falta: el juego vive en dist/index.html, pero Pages sirve desde
+# la raiz del repo o desde /docs. En vez de mantener una copia duplicada a mano
+# —que tarde o temprano queda vieja—, aqui se compila y se sube el resultado.
+
+name: Publicar el juego
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:        # tambien se puede lanzar a mano desde la web
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Si se empujan dos cambios seguidos, que gane el ultimo.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4

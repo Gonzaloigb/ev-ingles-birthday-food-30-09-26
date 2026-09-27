@@ -1,0 +1,1136 @@
+/* ============================================================
+   It is my birthday! — estilos
+   Adaptado del juego de ciencias. Misma estructura probada; cambia la
+   identidad: fiesta de cumpleanos y comida.
+   Paleta derivada de "Kids Learning" (ui-ux-pro-max), contraste verificado.
+   ============================================================ */
+
+:root {
+  /* Marca */
+  --azul: #DB2777;
+  --azul-claro: #FCE7F3;
+  --azul-borde: #FBCFE8;
+  --amarillo: #F59E0B;
+  --amarillo-claro: #FEF3C7;
+  --rosa: #E64980;
+  --rosa-claro: #FFE3EC;
+  --verde: #12B886;
+  --verde-claro: #D3F9E8;
+  --rojo: #DC2626;
+  --rojo-claro: #FEE2E2;
+  --morado: #7C3AED;
+
+  /* Fiesta */
+  --fiesta-rosa: #EC4899;
+  --fiesta-lila: #A855F7;
+  --hondo: #9D174D;
+
+  /* Texto — contraste sobre fondos claros >= 4.5:1 */
+  --tinta: #0F172A;
+  --tinta-suave: #475569;
+  --papel: #FFFFFF;
+
+  /* Fondos por zona */
+  --cielo-fiesta: linear-gradient(180deg, #FBCFE8 0%, #FCE7F3 60%, #FFFFFF 100%);
+  --cielo-comida: linear-gradient(180deg, #FED7AA 0%, #FFEDD5 60%, #FFFFFF 100%);
+  --cielo-escucha: linear-gradient(180deg, #BFDBFE 0%, #DBEAFE 60%, #FFFFFF 100%);
+  --cielo-gustos: linear-gradient(180deg, #E9D5FF 0%, #F3E8FF 60%, #FFFFFF 100%);
+  --cielo-escribir: linear-gradient(180deg, #BBF7D0 0%, #DCFCE7 60%, #FFFFFF 100%);
+  --cielo-prueba: linear-gradient(180deg, #FEF3C7 0%, #FFFBEB 60%, #FFFFFF 100%);
+
+  --sombra-s: 0 2px 6px rgba(15, 23, 42, .12);
+  --sombra-m: 0 6px 18px rgba(15, 23, 42, .16);
+  --sombra-g: 0 14px 34px rgba(15, 23, 42, .22);
+
+  --r-s: 12px;
+  --r-m: 20px;
+  --r-g: 30px;
+
+  --fuente: 'Baloo 2', 'Nunito', 'Segoe UI Rounded', 'Comic Sans MS', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #app { height: 100%; }
+
+body {
+  font-family: var(--fuente);
+  color: var(--tinta);
+  background: var(--azul-claro);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  /* Safari en iOS agranda el texto al girar el telefono a horizontal.
+     Con esto el juego se ve igual en las dos orientaciones. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Tocar dos veces seguidas hace zoom en iOS. En un juego donde se toca una
+   figura tras otra, eso pasa constantemente y desordena la pantalla. */
+button, .opcion, .punto-vertice, .tarjeta-zona { touch-action: manipulation; }
+
+button { font-family: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
+
+:focus-visible {
+  outline: 4px solid var(--azul);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ============================================================
+   ESTRUCTURA
+   ============================================================ */
+#app { display: flex; flex-direction: column; min-height: 100%; }
+
+.pantalla {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* 100vh en celular NO descuenta la barra de direcciones: el navegador la
+     mide como si estuviera oculta, y el pie de la pagina queda tapado.
+     `dvh` (dynamic viewport height) si sigue la barra cuando aparece y
+     desaparece. El 100vh queda primero como respaldo para navegadores viejos
+     que ignoran la linea siguiente. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.cielo-fiesta   { background: var(--cielo-fiesta); }
+.cielo-comida   { background: var(--cielo-comida); }
+.cielo-escucha  { background: var(--cielo-escucha); }
+.cielo-gustos   { background: var(--cielo-gustos); }
+.cielo-escribir { background: var(--cielo-escribir); }
+.cielo-prueba   { background: var(--cielo-prueba); }
+
+/* Cuadriculado tenue de fondo: el cuaderno de matematica.
+   Decorativo y detras de todo, nunca sobre un boton. */
+.pantalla::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--linea-cuad) 1px, transparent 1px),
+    linear-gradient(90deg, var(--linea-cuad) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: .34;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px clamp(12px, 3vw, 26px);
+  background: #FFFFFFD9;
+  backdrop-filter: blur(6px);
+  border-bottom: 3px solid var(--azul-borde);
+  flex-wrap: wrap;
+}
+
+.btn-volver {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  transition: transform .12s, background .12s;
+}
+.btn-volver:hover { background: var(--azul-claro); transform: translateX(-3px); }
+.btn-volver:active { transform: scale(.95); }
+
+.titulo-zona { font-size: clamp(19px, 2.4vw, 28px); font-weight: 800; flex: 1; }
+
+.contador {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+.progreso {
+  flex-basis: 100%;
+  height: 12px;
+  background: var(--azul-borde);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progreso i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--azul), var(--verde));
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+
+/* ============================================================
+   PORTADA
+   ============================================================ */
+.portada {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 30px 20px 60px;
+  text-align: center;
+}
+
+.portada h1 {
+  font-size: clamp(38px, 8vw, 74px);
+  font-weight: 800;
+  color: var(--azul);
+  text-shadow: 3px 3px 0 #fff, 6px 6px 0 var(--azul-borde);
+  line-height: 1.05;
+}
+
+.portada .lema {
+  font-size: clamp(17px, 2.4vw, 23px);
+  font-weight: 700;
+  color: var(--tinta-suave);
+  max-width: 30ch;
+}
+
+.desfile {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 620px;
+}
+.desfile .figura { width: clamp(58px, 10vw, 88px); height: auto; }
+
+.btn-grande {
+  background: var(--amarillo);
+  color: #3A2E10;
+  border-radius: var(--r-g);
+  padding: 17px 46px;
+  font-size: clamp(22px, 3.4vw, 30px);
+  font-weight: 800;
+  box-shadow: 0 8px 0 #B45309, var(--sombra-m);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn-grande:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #B45309, var(--sombra-g); }
+.btn-grande:active { transform: translateY(5px); box-shadow: 0 3px 0 #B45309; }
+
+.nota-portada {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tinta-suave);
+  background: #FFFFFFC0;
+  border: 2px solid var(--azul-borde);
+  border-radius: var(--r-s);
+  padding: 10px 16px;
+  max-width: 42ch;
+  line-height: 1.45;
+}
+
+/* ============================================================
+   MAPA
+   ============================================================ */
+.mapa {
+  flex: 1;
+  padding: 20px clamp(12px, 3vw, 26px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.saludo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #FFFFFFDD;
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px 18px;
+  max-width: 620px;
+  box-shadow: var(--sombra-s);
+}
+/* `width` explicito y `flex-shrink:0`: sin esto el SVG colapsa a casi nada
+   dentro del flex, porque no tiene ancho intrinseco. */
+.saludo .figura { width: 54px; min-width: 54px; height: 54px; flex-shrink: 0; }
+.saludo p { font-size: clamp(15px, 2vw, 19px); font-weight: 700; line-height: 1.4; }
+
+.rejilla-zonas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 780px;
+}
+
+.tarjeta-zona {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 14px;
+  text-align: left;
+  box-shadow: var(--sombra-s);
+  transition: transform .14s, box-shadow .14s, border-color .14s;
+}
+.tarjeta-zona:hover:not(.cerrada) {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-m);
+  border-color: var(--azul);
+}
+.tarjeta-zona:active:not(.cerrada) { transform: scale(.98); }
+.tarjeta-zona.cerrada { opacity: .58; cursor: not-allowed; filter: grayscale(.75); }
+
+.tarjeta-zona .numero {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  font-size: 23px; font-weight: 800;
+  flex-shrink: 0;
+}
+.tarjeta-zona .texto { flex: 1; min-width: 0; }
+.tarjeta-zona .texto b { display: block; font-size: 19px; font-weight: 800; }
+.tarjeta-zona .texto span { font-size: 14px; color: var(--tinta-suave); font-weight: 600; }
+.tarjeta-zona .estrellas { font-size: 19px; letter-spacing: 1px; white-space: nowrap; }
+.candado { font-size: 26px; }
+
+.total-estrellas {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--tinta-suave);
+  background: #FFFFFFCC;
+  border-radius: 999px;
+  padding: 7px 20px;
+}
+
+.fila-botones { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+.btn-chico {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-size: 16px;
+  font-weight: 800;
+  transition: transform .12s, background .12s;
+}
+.btn-chico:hover { background: var(--azul-claro); transform: translateY(-2px); }
+.btn-chico:active { transform: scale(.96); }
+.btn-chico.destacado { background: var(--azul); color: var(--papel); border-color: #3B5BDB; }
+.btn-chico.destacado:hover { background: #3B5BDB; }
+.btn-chico:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ============================================================
+   TABLERO DE JUEGO
+   ============================================================ */
+.tablero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px clamp(12px, 3vw, 26px) 40px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.consigna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.consigna .instruccion {
+  font-size: clamp(19px, 2.8vw, 27px);
+  font-weight: 800;
+  line-height: 1.3;
+  max-width: 26ch;
+}
+
+.consigna .apoyo {
+  font-size: clamp(14px, 1.9vw, 17px);
+  font-weight: 700;
+  color: var(--tinta-suave);
+  background: #FFFFFFCC;
+  border-left: 5px solid var(--azul);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  padding: 8px 14px;
+  max-width: 46ch;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.zona-juego {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ============================================================
+   OPCIONES
+   ============================================================ */
+.opciones {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  justify-items: stretch;
+}
+.opciones.dos    { grid-template-columns: repeat(auto-fit, minmax(min(220px, 46%), 1fr)); max-width: 620px; }
+.opciones.tres   { grid-template-columns: repeat(auto-fit, minmax(min(160px, 45%), 1fr)); max-width: 700px; }
+.opciones.cuatro { grid-template-columns: repeat(auto-fit, minmax(min(140px, 44%), 1fr)); max-width: 720px; }
+.opciones.texto  { grid-template-columns: repeat(auto-fit, minmax(min(200px, 46%), 1fr)); max-width: 660px; }
+
+.opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--papel);
+  border: 4px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px 10px;
+  box-shadow: var(--sombra-s);
+  transition: transform .13s, border-color .13s, background .13s;
+}
+.opcion:hover:not(.bloqueada) { transform: translateY(-5px) scale(1.03); border-color: var(--azul); }
+.opcion:active:not(.bloqueada) { transform: scale(.96); }
+.opcion .figura { width: clamp(72px, 13vw, 106px); height: auto; }
+.opcion .etiqueta { font-size: 17px; font-weight: 800; line-height: 1.25; }
+.opcion.bloqueada { cursor: default; }
+.opcion.correcta { border-color: var(--verde); background: var(--verde-claro); animation: brincar .5s; }
+.opcion.errada { border-color: var(--rojo); background: var(--rojo-claro); animation: temblar .4s; }
+.opcion.marcada { border-color: var(--rosa); background: var(--rosa-claro); transform: scale(.97); }
+
+/* Opcion solo de texto (las adivinanzas y las categorias) */
+.opcion.solo-texto {
+  min-height: 62px;
+  justify-content: center;
+  font-size: clamp(17px, 2.3vw, 21px);
+  font-weight: 800;
+}
+
+/* ============================================================
+   FIGURAS
+   ============================================================ */
+.figura { display: block; width: 100%; height: auto; overflow: visible; }
+.figura .vertice { transition: r .15s; }
+
+/* Las marcas de angulo aparecen con una animacion corta: llaman la atencion
+   justo cuando se revela la respuesta. */
+.marca-recto, .marca-curvo { animation: aparecer .32s ease-out; }
+@keyframes aparecer { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+/* Figura grande, para cuando se pregunta por una sola */
+.figura-grande { width: clamp(190px, 42vw, 280px); height: auto; }
+
+.tarjeta-figura {
+  background: var(--papel);
+  border: 4px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 14px;
+  box-shadow: var(--sombra-s);
+  display: grid;
+  place-items: center;
+}
+
+/* ============================================================
+   VERTICES CLICABLES (zona de angulos)
+   ============================================================ */
+.lienzo-vertices { position: relative; display: inline-block; }
+.lienzo-vertices .figura { width: clamp(230px, 52vw, 330px); }
+
+.punto-vertice {
+  position: absolute;
+  width: 40px; height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 4px solid var(--azul);
+  background: #FFFFFFEE;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 800;
+  color: var(--azul);
+  box-shadow: var(--sombra-s);
+  transition: transform .13s, background .13s;
+}
+.punto-vertice:hover:not(.bloqueado) { transform: scale(1.16); }
+.punto-vertice.marcado { background: var(--rosa); border-color: var(--rosa); color: #fff; }
+.punto-vertice.correcto { background: var(--verde); border-color: var(--verde); color: #fff; }
+.punto-vertice.errado { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+.punto-vertice.bloqueado { cursor: default; }
+
+/* ============================================================
+   CUADRICULA (zona constructor)
+   ============================================================ */
+.marco-cuadricula {
+  background: var(--papel);
+  border: 4px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px;
+  box-shadow: var(--sombra-s);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cuadricula {
+  display: block;
+  /* Sin esto el arrastre con el dedo hace scroll de la pagina en vez de dibujar. */
+  touch-action: none;
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.medida-guia {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--tinta-suave);
+  text-align: center;
+  margin-top: 6px;
+}
+
+.pedido {
+  font-size: clamp(19px, 2.7vw, 25px);
+  font-weight: 800;
+  color: var(--azul);
+  background: var(--azul-claro);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 10px 20px;
+  text-align: center;
+}
+
+/* ============================================================
+   AVISOS
+   ============================================================ */
+.aviso {
+  min-height: 30px;
+  font-size: clamp(17px, 2.3vw, 21px);
+  font-weight: 800;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 44ch;
+}
+.aviso.bien { color: #0B7A5A; animation: brincar .45s; }
+.aviso.mal { color: #A81C1C; }
+.aviso .pista {
+  font-size: clamp(14px, 1.9vw, 17px);
+  font-weight: 700;
+  color: var(--tinta);
+  background: var(--amarillo-claro);
+  border: 2px solid #F2C14E;
+  border-radius: var(--r-s);
+  padding: 9px 15px;
+  line-height: 1.45;
+}
+
+/* ============================================================
+   FINAL DE ZONA
+   ============================================================ */
+.fiesta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 20px 0;
+}
+.fiesta h2 { font-size: clamp(27px, 5vw, 42px); font-weight: 800; color: var(--azul); }
+.estrellas-grandes { font-size: clamp(42px, 9vw, 66px); letter-spacing: 8px; }
+.puntaje { font-size: clamp(19px, 2.6vw, 25px); font-weight: 800; color: var(--tinta-suave); }
+
+.panel {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 15px 20px;
+  box-shadow: var(--sombra-s);
+  max-width: 560px;
+  width: 100%;
+}
+.panel h3 { font-size: 19px; font-weight: 800; margin-bottom: 7px; color: var(--azul); }
+.panel p { font-size: 17px; font-weight: 700; line-height: 1.5; }
+
+/* ============================================================
+   INFORME
+   ============================================================ */
+.informe {
+  flex: 1;
+  padding: 20px clamp(12px, 3vw, 26px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* La tabla necesita su propio scroll horizontal, o la pagina entera
+   scrollea en celular.
+   `min-width: 0` es imprescindible: dentro de un contenedor flex, el ancho
+   minimo por defecto es el del contenido, asi que sin esto el marco se estira
+   hasta caber la tabla entera y el overflow-x nunca llega a actuar. */
+.marco-tabla { width: 100%; min-width: 0; overflow-x: auto; }
+.informe .panel { min-width: 0; max-width: 100%; }
+
+.tabla-informe { width: 100%; border-collapse: collapse; font-size: 16px; min-width: 420px; }
+.tabla-informe th {
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 3px solid var(--azul-borde);
+  font-size: 14px;
+  color: var(--tinta-suave);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.tabla-informe td { padding: 9px 10px; border-bottom: 1px solid #E7EDFA; font-weight: 700; }
+
+.barra-dominio {
+  display: inline-block;
+  height: 11px;
+  border-radius: 999px;
+  background: var(--verde);
+  vertical-align: middle;
+  margin-right: 7px;
+}
+.barra-dominio.medio { background: var(--amarillo); }
+.barra-dominio.bajo { background: var(--rojo); }
+
+.etiqueta-nivel {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.etiqueta-nivel.alto { background: var(--verde-claro); color: #0B7A5A; }
+.etiqueta-nivel.medio { background: var(--amarillo-claro); color: #8A5A05; }
+.etiqueta-nivel.bajo { background: var(--rojo-claro); color: #A81C1C; }
+
+/* ============================================================
+   CONFETI Y ANIMACIONES
+   ============================================================ */
+.confeti {
+  position: fixed;
+  top: -14px;
+  width: 11px; height: 15px;
+  z-index: 999;
+  animation: caer linear forwards;
+  pointer-events: none;
+}
+@keyframes caer {
+  to { transform: translateY(105vh) rotate(760deg); opacity: .1; }
+}
+
+@keyframes brincar {
+  0%, 100% { transform: none; }
+  35% { transform: translateY(-11px) scale(1.06); }
+  70% { transform: translateY(-4px); }
+}
+@keyframes temblar {
+  0%, 100% { transform: none; }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+@keyframes latir {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.07); }
+}
+
+/* Respetar a quien pidio menos movimiento en su sistema */
+
+/* ============================================================
+   SELECTOR DE MODO (mapa)
+
+   Va en el mapa y no en la portada para poder cambiarlo a mitad de sesion.
+   Los dos chips caben lado a lado incluso a 320px: por eso el minmax bajo.
+   ============================================================ */
+.selector-modo {
+  width: 100%;
+  max-width: 560px;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px 14px;
+  box-shadow: var(--sombra-s);
+}
+
+.etiqueta-modo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--tinta-suave);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.grupo-modo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.chip-modo {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  background: var(--azul-claro);
+  color: var(--tinta);
+  border: 3px solid transparent;
+  border-radius: var(--r-s);
+  padding: 10px 8px;
+  font-family: inherit;
+  font-size: clamp(15px, 2.6vw, 18px);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .12s, border-color .12s, background .12s;
+}
+.chip-modo span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+.chip-modo:hover { transform: translateY(-2px); }
+.chip-modo.activo {
+  background: var(--papel);
+  border-color: var(--azul);
+  box-shadow: var(--sombra-s);
+}
+.chip-modo.activo span { color: var(--azul); }
+
+.desc-modo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tinta-suave);
+  text-align: center;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* ============================================================
+   VIDAS (modo dificil)
+   ============================================================ */
+.vidas {
+  font-size: clamp(15px, 2.6vw, 19px);
+  letter-spacing: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sello-duro {
+  background: var(--amarillo-claro);
+  color: #7A4A02;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ============================================================
+   DIBUJOS Y PARTICULAS
+   ============================================================ */
+.dib {
+  width: clamp(120px, 34vw, 200px);
+  height: auto;
+  display: block;
+}
+
+.tarjeta-dibujo {
+  background: var(--papel);
+  border: 4px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px;
+  box-shadow: var(--sombra-s);
+  display: grid;
+  place-items: center;
+}
+.tarjeta-dibujo.chica .dib { width: clamp(90px, 24vw, 140px); }
+
+/* Las particulas laten muy suave: sugiere movimiento sin distraer.
+   Se apaga entero bajo prefers-reduced-motion (mas abajo). */
+.p-sueltas circle   { animation: latir 3.2s ease-in-out infinite; }
+.p-dispersas circle { animation: flotar 4.5s ease-in-out infinite; }
+
+@keyframes latir  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(1.5px); } }
+@keyframes flotar { 0%,100% { transform: translate(0,0); } 50% { transform: translate(2px,-3px); } }
+
+
+/* Muestras de la portada: los tres estados lado a lado */
+.muestra-estado {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  background: rgba(255, 255, 255, .72);
+  border-radius: var(--r-s);
+  padding: 8px 6px;
+}
+.muestra-estado .dib { width: clamp(64px, 18vw, 96px); }
+.muestra-estado span {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--hondo);
+}
+
+/* ============================================================
+   AUDIO — la prueba es auditiva, el boton es contenido
+   ============================================================ */
+.fila-audio {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-audio {
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 24px;
+  font-family: inherit;
+  font-size: clamp(16px, 2.8vw, 20px);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--sombra-s);
+  transition: transform .12s;
+}
+.btn-audio:hover { transform: translateY(-2px); }
+.btn-audio.sonando .bocina { animation: sonar .6s ease-in-out infinite; }
+@keyframes sonar { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* La frase en ingles escrita, cuando se muestra */
+.frase-en {
+  font-size: clamp(19px, 3.4vw, 26px);
+  font-weight: 800;
+  color: var(--hondo);
+  letter-spacing: .01em;
+}
+
+/* Aviso sobre la voz, en la portada. Sin voz en ingles el juego pierde su
+   parte principal: vale mas avisarlo aqui que dejar que suene en espanol. */
+.aviso-voz {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tinta-suave);
+  text-align: center;
+  max-width: 34ch;
+  line-height: 1.35;
+}
+.aviso-voz.ok { color: #15803D; }
+.aviso-voz.alerta {
+  color: #9A3412;
+  background: #FFEDD5;
+  border-radius: var(--r-s);
+  padding: 9px 13px;
+}
+
+/* ============================================================
+   EMOJIS Y FRASES
+   ============================================================ */
+.emoji { font-size: clamp(38px, 11vw, 58px); line-height: 1.1; }
+.emoji.grande { font-size: clamp(54px, 16vw, 86px); }
+
+.tarjeta-emoji {
+  background: var(--papel);
+  border: 4px solid var(--azul-borde);
+  border-radius: var(--r-m);
+  padding: 12px 20px;
+  box-shadow: var(--sombra-s);
+  display: grid;
+  place-items: center;
+}
+
+/* Frase con un hueco que completar */
+.frase-hueco {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-s);
+  padding: 15px 20px;
+  font-size: clamp(20px, 3.6vw, 27px);
+  font-weight: 800;
+  color: var(--hondo);
+  box-shadow: var(--sombra-s);
+  text-align: center;
+}
+.frase-hueco .hueco {
+  display: inline-block;
+  min-width: 68px;
+  border-bottom: 4px solid var(--azul);
+  color: var(--azul);
+}
+
+/* Frase para juzgar si esta bien escrita */
+.frase-examen {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-left: 8px solid var(--azul);
+  border-radius: var(--r-s);
+  padding: 15px 18px;
+  max-width: 560px;
+  font-size: clamp(19px, 3.4vw, 25px);
+  font-weight: 800;
+  color: var(--hondo);
+  line-height: 1.35;
+  box-shadow: var(--sombra-s);
+  text-align: center;
+}
+
+/* Campo de escritura */
+.fila-escribir {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 480px;
+}
+.campo {
+  flex: 1 1 200px;
+  min-width: 0;
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: var(--r-s);
+  padding: 13px 16px;
+  font-family: inherit;
+  font-size: clamp(19px, 3.4vw, 24px);
+  font-weight: 800;
+  color: var(--tinta);
+  text-align: center;
+}
+.campo:focus { outline: 3px solid var(--azul); outline-offset: 2px; }
+.campo.correcta { border-color: var(--verde); background: var(--verde-claro); }
+.campo.errada { border-color: var(--rojo); background: var(--rojo-claro); }
+
+/* Muestras de la portada */
+.muestra-palabra {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  background: rgba(255,255,255,.72);
+  border-radius: var(--r-s);
+  padding: 7px 9px;
+}
+.muestra-palabra .emoji { font-size: clamp(28px, 8vw, 40px); }
+.muestra-palabra span:last-child {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--hondo);
+}
+
+/* Pie de una alternativa con dibujo */
+.opcion .pie {
+  font-size: clamp(14px, 2.4vw, 16px);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+.opcion .dib { width: clamp(76px, 20vw, 120px); }
+
+/* Alternativas en lista: frases largas, una por fila.
+   Van alineadas a la izquierda porque son oraciones, no etiquetas. */
+.opciones.lista {
+  grid-template-columns: 1fr;
+  max-width: 640px;
+}
+.opciones.lista .opcion {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 13px 16px;
+  line-height: 1.3;
+}
+
+/* Numero de zona: cada una toma el color de su momento */
+.tarjeta-zona .numero { color: #fff; }
+.numero.n-fiesta   { background: #EC4899; }
+.numero.n-comida   { background: #EA580C; }
+.numero.n-escucha  { background: #2563EB; }
+.numero.n-gustos   { background: #9333EA; }
+.numero.n-escribir { background: #16A34A; }
+.numero.n-prueba   { background: #F59E0B; color: #3A2E10; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ============================================================
+   CELULAR
+   ============================================================
+   Medido en 360x640, el piso realista de un Android chico; el iPhone SE es
+   375x667. Antes de esto el mapa obligaba a 316px de scroll —las zonas 5 y 6
+   quedaban fuera— y en la zona de angulos el aviso con la PISTA caia bajo la
+   linea de flotacion, asi que Marina no llegaba a leer por que se equivoco.
+
+   Principio: apretar lo que sobra (margenes, tamanos de letra decorativos,
+   el recordatorio de la definicion) sin tocar lo que hay que TOCAR con el
+   dedo. Los blancos de apuntado se mantienen en 44px o mas, que es el minimo
+   que Apple y Google recomiendan para no fallar el toque.
+   ============================================================ */
+@media (max-width: 460px) {
+  /* --- Barra superior: mas compacta, deja mas alto al juego --- */
+  .barra { padding: 8px 10px; gap: 7px; }
+  .titulo-zona { font-size: 17px; }
+  .btn-volver { padding: 8px 14px; font-size: 15px; }  /* sigue sobre 40px de alto */
+  .contador { font-size: 15px; }
+  .progreso { height: 9px; }
+
+  /* --- Selector de modo: el chip sigue siendo un blanco de 44px --- */
+  .selector-modo { padding: 9px 10px; gap: 6px; }
+  .etiqueta-modo { font-size: 13px; }
+  .grupo-modo { gap: 7px; }
+  .chip-modo { padding: 8px 6px; font-size: 15px; }
+  .chip-modo span { font-size: 12px; }
+  .desc-modo { font-size: 12.5px; line-height: 1.3; }
+
+  /* --- Dibujos: ceden alto, que es lo escaso en celular --- */
+  .tarjeta-dibujo { padding: 8px; }
+  .tarjeta-dibujo .dib { width: clamp(104px, 30vw, 150px); }
+  .tarjeta-dibujo.chica .dib { width: clamp(78px, 22vw, 110px); }
+  .opcion .dib { width: clamp(64px, 18vw, 92px); }
+  .muestra-estado { padding: 6px 4px; }
+  .muestra-estado .dib { width: clamp(54px, 16vw, 72px); }
+  .muestra-estado span { font-size: 12px; }
+
+  /* --- Alternativas en lista: frases largas necesitan aire vertical --- */
+  .opciones.lista .opcion { padding: 11px 13px; font-size: 15px; }
+
+  /* --- Audio: el boton sigue siendo un blanco de 44px --- */
+  .btn-audio { padding: 10px 18px; font-size: 16px; }
+  .fila-audio { gap: 8px; }
+  .frase-en { font-size: 19px; }
+  .aviso-voz { font-size: 12.5px; }
+
+  /* --- Emojis y frases: ceden alto, que es lo escaso --- */
+  .emoji { font-size: 36px; }
+  .emoji.grande { font-size: 52px; }
+  .tarjeta-emoji { padding: 9px 16px; }
+  .frase-hueco { padding: 12px 14px; font-size: 20px; }
+  .frase-hueco .hueco { min-width: 56px; }
+  .frase-examen { padding: 12px 14px; font-size: 18px; border-left-width: 6px; }
+  .campo { padding: 11px 13px; font-size: 19px; }
+  .muestra-palabra { padding: 5px 7px; }
+  .muestra-palabra .emoji { font-size: 26px; }
+  .muestra-palabra span:last-child { font-size: 11.5px; }
+
+  /* --- Mapa: la causa principal del scroll --- */
+  .mapa { padding: 12px 10px 24px; gap: 10px; }
+  .saludo { padding: 9px 12px; gap: 10px; }
+  .saludo p { font-size: 14px; line-height: 1.3; }
+  .saludo .figura { width: 40px; min-width: 40px; height: 40px; }
+  .total-estrellas { font-size: 16px; padding: 5px 15px; }
+
+  .rejilla-zonas { gap: 9px; }
+  .tarjeta-zona { padding: 9px 11px; gap: 10px; border-width: 2px; }
+  .tarjeta-zona .numero { width: 36px; height: 36px; border-radius: 11px; font-size: 19px; }
+  .tarjeta-zona .texto b { font-size: 16px; }
+  .tarjeta-zona .texto span { font-size: 12.5px; }
+  .tarjeta-zona .estrellas { font-size: 16px; }
+
+  /* --- Tablero de juego --- */
+  .tablero { padding: 12px 10px 24px; gap: 10px; }
+  .consigna { gap: 6px; }
+  .consigna .instruccion { font-size: 19px; max-width: 22ch; }
+
+  /* El recordatorio de la definicion es apoyo, no la pregunta: se achica y,
+     si la pantalla es MUY baja, desaparece (ver mas abajo). */
+  .consigna .apoyo { font-size: 13.5px; padding: 6px 11px; line-height: 1.35; }
+
+  .zona-juego { gap: 10px; }
+
+  /* --- Opciones: siguen siendo blancos de dedo --- */
+  .opciones { gap: 9px; }
+  .opcion { padding: 9px 7px; border-width: 3px; min-height: 48px; }
+  .opcion.solo-texto { min-height: 52px; font-size: 17px; }
+  .opcion .figura { width: clamp(64px, 20vw, 88px); }
+  .opcion .etiqueta { font-size: 15px; }
+
+  .tarjeta-figura { padding: 9px; }
+  .figura-grande { width: clamp(150px, 44vw, 200px); }
+
+  /* --- Vertices: el blanco se mantiene grande aunque el circulo se vea chico.
+         Un vertice dificil de tocar arruina la zona 3 entera. --- */
+  .punto-vertice { width: 44px; height: 44px; margin: -22px 0 0 -22px; font-size: 14px; }
+  .lienzo-vertices .figura { width: clamp(210px, 62vw, 260px); }
+
+  /* --- Botones --- */
+  .btn-chico { padding: 11px 18px; font-size: 15px; }  /* alto >= 44px */
+  .fila-botones { gap: 9px; }
+
+  /* --- Cuadricula: es lo que MAS se aprovecha del ancho --- */
+  .marco-cuadricula { padding: 7px; border-width: 3px; }
+  .pedido { font-size: 19px; padding: 7px 15px; }
+  .medida-guia { font-size: 12.5px; }
+
+  /* --- Aviso y pista: tienen que caber, es donde se explica el error --- */
+  .aviso { font-size: 17px; max-width: 100%; }
+  .aviso .pista { font-size: 13.5px; padding: 7px 12px; line-height: 1.4; }
+
+  /* --- Final de zona --- */
+  .fiesta { gap: 11px; padding: 12px 0; }
+  .fiesta h2 { font-size: 26px; }
+  .estrellas-grandes { font-size: 42px; letter-spacing: 5px; }
+  .puntaje { font-size: 18px; }
+  .panel { padding: 11px 14px; }
+  .panel h3 { font-size: 17px; }
+  .panel p { font-size: 15px; }
+
+  /* --- Portada e informe --- */
+  .portada { gap: 15px; padding: 20px 14px 30px; }
+  .portada h1 { font-size: 44px; }
+  .portada .lema { font-size: 16px; }
+  .desfile { gap: 6px; }
+  .desfile .figura { width: 54px; }
+  .btn-grande { padding: 15px 38px; font-size: 23px; }
+  .nota-portada { font-size: 13.5px; padding: 8px 13px; }
+
+  .informe { padding: 12px 10px 24px; gap: 10px; }
+  .tabla-informe { font-size: 14.5px; }
+}
+
+/* --- Pantallas MUY bajas (celular acostado, o iPhone SE) ---
+   Aqui el alto es el recurso escaso. Se sacrifica el recordatorio de la
+   definicion, que es apoyo: la instruccion y las opciones se mantienen.
+   La pista del error NO se toca: es lo que ensena. */
+@media (max-height: 620px) {
+  .consigna .apoyo { display: none; }
+  .tablero { padding-top: 8px; gap: 8px; }
+  .barra { padding: 6px 10px; }
+  .figura-grande { width: clamp(120px, 34vw, 165px); }
+  .lienzo-vertices .figura { width: clamp(170px, 48vw, 215px); }
+  .portada h1 { font-size: 36px; }
+  .desfile { display: none; }
+}
+
+/* --- Celular acostado: aprovechar el ancho, no el alto --- */
+@media (max-height: 480px) and (orientation: landscape) {
+  .rejilla-zonas { grid-template-columns: repeat(2, 1fr); }
+  .fiesta { padding: 6px 0; gap: 7px; }
+  .estrellas-grandes { font-size: 32px; }
+}
