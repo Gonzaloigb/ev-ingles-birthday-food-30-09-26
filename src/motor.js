@@ -162,7 +162,10 @@ export function correrZona(cfg) {
         fallos.push(palabra);
         sonarMal();
         racha.romper();
-        mascota.reaccionar('triste', uno(FRASES.mal));
+        // La pista manda sobre la mascota: una pista que no se ve no ensena
+        // nada. Mientras esta en pantalla, la mascota se aparta.
+        if (pista && ayuda) pantalla.classList.add('con-pista');
+        mascota.reaccionar('triste', (pista && ayuda) ? '' : uno(FRASES.mal));
         vidas -= 1;
         pintarVidas();
         aviso.className = 'aviso mal';
@@ -184,6 +187,7 @@ export function correrZona(cfg) {
       await esperar(acerto ? 1100 : (ayuda ? 2900 : 1100));
       aviso.className = 'aviso';
       aviso.replaceChildren();
+      pantalla.classList.remove('con-pista');
 
       // Modo dificil: sin vidas, la zona vuelve a empezar.
       if (m.vidas > 0 && vidas <= 0) return sinVidas();

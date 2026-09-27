@@ -1053,6 +1053,14 @@ input { font-family: inherit; }
   70%      { transform: translateX(-3px) rotate(-2deg); }
 }
 
+/* Mientras se lee la pista del error, la mascota se aparta: el texto que
+   ensena tiene prioridad sobre el que acompana. Vuelve sola al limpiarse. */
+.con-pista .mascota {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .2s, transform .2s;
+}
+
 /* ============================================================
    LA RACHA
 
