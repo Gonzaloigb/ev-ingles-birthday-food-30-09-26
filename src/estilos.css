@@ -978,6 +978,129 @@ input { font-family: inherit; }
 .numero.n-escribir { background: #16A34A; }
 .numero.n-prueba   { background: #F59E0B; color: #3A2E10; }
 
+
+/* ============================================================
+   LA MASCOTA
+
+   Acompana abajo a la derecha, fuera del camino de los botones. Es `fixed`
+   porque tiene que seguir visible aunque la zona haga scroll: si desaparece al
+   bajar, deja de acompanar justo cuando aparece el aviso del error.
+   ============================================================ */
+.mascota {
+  position: fixed;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  pointer-events: none;   /* nunca se pone entre el dedo y un boton */
+}
+
+.mascota-cuerpo {
+  width: clamp(54px, 15vw, 78px);
+  filter: drop-shadow(0 4px 10px rgba(15, 23, 42, .18));
+}
+.mascota-svg { width: 100%; height: auto; display: block; }
+
+/* Colores de la cara: heredan la paleta del juego, sin repetir valores. */
+.mascota-svg .cara { fill: var(--amarillo); stroke: var(--hondo, #92400E); stroke-width: 3.5; }
+.mascota-svg .ojo { fill: var(--hondo, #92400E); }
+.mascota-svg .ojo-linea,
+.mascota-svg .boca,
+.mascota-svg .ceja {
+  fill: none;
+  stroke: var(--hondo, #92400E);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.mascota-svg .boca-llena { fill: var(--hondo, #92400E); }
+.mascota-svg .rubor { fill: var(--rosa, #EC4899); opacity: .45; }
+
+/* El globo de dialogo */
+.globo {
+  background: var(--papel);
+  border: 3px solid var(--azul-borde);
+  border-radius: 14px;
+  padding: 6px 12px;
+  font-size: clamp(13px, 2.4vw, 16px);
+  font-weight: 800;
+  color: var(--hondo, var(--tinta));
+  box-shadow: var(--sombra-s);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px) scale(.9);
+  transition: opacity .18s, transform .18s;
+}
+.globo.visible { opacity: 1; transform: none; }
+
+/* Salta al acertar, tiembla al fallar. Son el acuse de recibo del toque:
+   sin esto, el unico aviso de que el juego registro la respuesta es el
+   cambio de color, que con el dedo encima no siempre se ve. */
+.mascota-cuerpo.salta { animation: mascota-salta .5s ease; }
+.mascota-cuerpo.tiembla { animation: mascota-tiembla .4s ease; }
+
+@keyframes mascota-salta {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30%      { transform: translateY(-13px) scale(1.06); }
+  55%      { transform: translateY(0) scale(.97); }
+  75%      { transform: translateY(-5px); }
+}
+@keyframes mascota-tiembla {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px) rotate(-4deg); }
+  45%      { transform: translateX(5px) rotate(4deg); }
+  70%      { transform: translateX(-3px) rotate(-2deg); }
+}
+
+/* ============================================================
+   LA RACHA
+
+   Aparece recien en la tercera seguida: antes seria ruido, y "2 seguidas"
+   tampoco es un logro. Al fallar desaparece sin drama.
+   ============================================================ */
+.racha {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  background: var(--amarillo-claro);
+  color: #7A4A02;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: clamp(12px, 2.2vw, 15px);
+  font-weight: 800;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.racha.visible { display: inline-flex; }
+.racha.r2 { background: #FED7AA; color: #7C2D12; }
+.racha.r3 { background: #FECACA; color: #7F1D1D; }
+.racha .llama { font-size: 1.05em; }
+
+.racha.crece { animation: racha-crece .45s ease; }
+@keyframes racha-crece {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================================
+   RESPUESTA: el boton acusa recibo
+   ============================================================ */
+.anim-bien { animation: op-bien .45s ease; }
+.anim-mal  { animation: op-mal .4s ease; }
+
+@keyframes op-bien {
+  0%, 100% { transform: scale(1); }
+  45%      { transform: scale(1.07); }
+}
+@keyframes op-mal {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  55%      { transform: translateX(6px); }
+  80%      { transform: translateX(-3px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -1023,6 +1146,11 @@ input { font-family: inherit; }
   .muestra-estado { padding: 6px 4px; }
   .muestra-estado .dib { width: clamp(54px, 16vw, 72px); }
   .muestra-estado span { font-size: 12px; }
+
+  /* --- Mascota: mas chica, para no comerse el tablero --- */
+  .mascota-cuerpo { width: 50px; }
+  .globo { padding: 5px 9px; font-size: 12.5px; }
+  .racha { padding: 3px 9px; font-size: 12px; }
 
   /* --- Alternativas en lista: frases largas necesitan aire vertical --- */
   .opciones.lista .opcion { padding: 11px 13px; font-size: 15px; }
@@ -1141,4 +1269,9 @@ input { font-family: inherit; }
   .rejilla-zonas { grid-template-columns: repeat(2, 1fr); }
   .fiesta { padding: 6px 0; gap: 7px; }
   .estrellas-grandes { font-size: 32px; }
+}
+
+/* En apaisado la altura es minima: la mascota es lo primero que sobra. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .mascota { display: none; }
 }

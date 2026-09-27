@@ -14,9 +14,10 @@
  * entenderlo de oido, que es como sera la prueba.
  */
 
-import { el, esperar, estrellasPorPuntaje, confeti, pintarEstrellas } from './util.js';
+import { el, esperar, estrellasPorPuntaje, confeti, pintarEstrellas, uno } from './util.js';
 import { sonarBien, sonarMal, sonarVictoria, sonarEstrella } from './audio.js';
 import { guardarEstrellas, registrar } from './estado.js';
+import { crearMascota, crearRacha, animarRespuesta, FRASES } from './vida.js';
 import { MODOS, modo as modoDe } from './modos.js';
 import { decir, callar } from './voz.js';
 
@@ -65,7 +66,12 @@ export function correrZona(cfg) {
   const aviso = el('div', 'aviso');
   tablero.append(consigna, zonaJuego, aviso);
 
-  pantalla.append(barra, tablero);
+  // La vida del juego: acompana y celebra, sin cambiar lo que se evalua.
+  const mascota = crearMascota();
+  const racha = crearRacha();
+  barra.append(racha.nodo);
+
+  pantalla.append(barra, tablero, mascota.nodo);
   raiz.replaceChildren(pantalla);
 
   btnVolver.addEventListener('click', () => {
@@ -82,6 +88,9 @@ export function correrZona(cfg) {
   const ctx = {
     consigna,
     zonaJuego,
+    // Para que una zona pueda animar el boton que se toco.
+    animar: animarRespuesta,
+    mascota,
     modo: m.id,
     // Las zonas preguntan esto para decidir cuantas alternativas ofrecer.
     ayuda,
@@ -137,11 +146,23 @@ export function correrZona(cfg) {
       if (acerto) {
         aciertos += 1;
         sonarBien();
+
+        // La racha premia la constancia, no el resultado final: se puede ir mal
+        // en la zona y aun asi encadenar tres buenas.
+        const subio = racha.sumar();
+        const n = racha.cuenta();
+        const frase = subio
+          ? uno(FRASES[`racha${n}`] || FRASES.bien)
+          : uno(FRASES.bien);
+        mascota.reaccionar('feliz', frase);
+
         aviso.className = 'aviso bien';
         aviso.replaceChildren(el('span', '', mensajeBien || '¡Muy bien! 🎉'));
       } else {
         fallos.push(palabra);
         sonarMal();
+        racha.romper();
+        mascota.reaccionar('triste', uno(FRASES.mal));
         vidas -= 1;
         pintarVidas();
         aviso.className = 'aviso mal';
@@ -190,6 +211,7 @@ export function correrZona(cfg) {
   function reiniciar() {
     indice = 0;
     aciertos = 0;
+    racha.romper();
     vidas = m.vidas;
     fallos.length = 0;
     raiz.replaceChildren(pantalla);
@@ -258,6 +280,7 @@ export function correrZona(cfg) {
     tablero.replaceChildren(fiesta);
 
     if (bien) {
+      mascota.reaccionar('feliz', '¡Lo lograste!', 3000);
       sonarVictoria();
       confeti(70);
       for (let i = 0; i < estrellas; i++) {
