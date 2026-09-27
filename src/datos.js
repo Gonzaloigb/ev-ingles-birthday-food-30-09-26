@@ -28,7 +28,7 @@ export const CUMPLEANOS = [
   { en: 'yoghurt', es: 'yogur', emoji: '🍦', esComida: true },
   { en: 'cherries', es: 'cerezas', emoji: '🍒', esComida: true },
   { en: 'popcorn', es: 'palomitas', emoji: '🍿', esComida: true },
-  { en: 'crisps', es: 'papas fritas', emoji: '🥔', esComida: true },
+  { en: 'crisps', es: 'papas fritas de bolsa', emoji: '🥔', esComida: true },  // dibujo propio
   { en: 'water', es: 'agua', emoji: '💧', esComida: true },
   // No es comida: es el "objeto" que nombra el temario.
   { en: 'birthday card', es: 'tarjeta de cumpleaños', emoji: '💌', esComida: false },
@@ -49,7 +49,7 @@ export const COMIDAS = [
   { en: 'apples', es: 'manzanas', emoji: '🍎', de: 'plants' },
   { en: 'bread', es: 'pan', emoji: '🍞', de: 'plants' },
   { en: 'orange juice', es: 'jugo de naranja', emoji: '🧃', de: 'plants' },
-  { en: 'crisps', es: 'papas fritas', emoji: '🥔', de: 'plants' },
+  { en: 'crisps', es: 'papas fritas de bolsa', emoji: '🥔', de: 'plants' },
 ];
 
 export const ORIGENES = {
@@ -65,7 +65,7 @@ export const OLLA = [
   { en: 'mushrooms', es: 'champiñones', emoji: '🍄', esComida: true },
   { en: 'onions', es: 'cebollas', emoji: '🧅', esComida: true },
   // Unico plural con -es de la unidad.
-  { en: 'potatoes', es: 'papas', emoji: '🥔', esComida: true, plural: 'es' },
+  { en: 'potatoes', es: 'papas', emoji: '🥔', esComida: true, plural: 'es' },  // dibujo propio
   // Con articulo, porque es singular: "Have you got A POT?"
   { en: 'a pot', es: 'una olla', emoji: '🍲', esComida: false },
 ];

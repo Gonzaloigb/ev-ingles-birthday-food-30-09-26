@@ -15,6 +15,7 @@
 
 import { COMIDAS, OLLA, ORIGENES, pistaDeError, AVISOS } from '../datos.js';
 import { el, barajar, uno, elegirCon } from '../util.js';
+import { imagen } from '../dibujos.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;
@@ -49,7 +50,7 @@ function montarDeDondeViene(ctx, c) {
     apoyo: 'Food from animals: viene de un animal · Food from plants: de una planta.',
   });
 
-  const tarjeta = el('div', 'tarjeta-emoji', `<span class="emoji grande">${c.emoji}</span>`);
+  const tarjeta = el('div', 'tarjeta-emoji', imagen(c, true));
   ctx.zonaJuego.append(tarjeta);
 
   const opciones = el('div', 'opciones dos');
@@ -93,7 +94,7 @@ function montarEscucha(ctx, c) {
 
   for (const x of cartas) {
     const btn = el('button', 'opcion',
-      `<span class="emoji">${x.emoji}</span>`,
+      imagen(x),
       { type: 'button', 'data-en': x.en, 'aria-label': x.es });
 
     btn.addEventListener('click', () => {
@@ -132,7 +133,7 @@ function montarCualEs(ctx) {
   const opciones = el('div', 'opciones tres');
   for (const c of cartas) {
     const btn = el('button', 'opcion',
-      `<span class="emoji">${c.emoji}</span><span class="pie">${c.en}</span>`,
+      `${imagen(c)}<span class="pie">${c.en}</span>`,
       { type: 'button', 'data-en': c.en });
 
     btn.addEventListener('click', () => {
@@ -173,7 +174,7 @@ function montarOlla(ctx) {
 
   for (const x of cartas) {
     const btn = el('button', 'opcion',
-      `<span class="emoji">${x.emoji}</span><span class="pie">${x.en}</span>`,
+      `${imagen(x)}<span class="pie">${x.en}</span>`,
       { type: 'button', 'data-en': x.en });
 
     btn.addEventListener('click', () => {

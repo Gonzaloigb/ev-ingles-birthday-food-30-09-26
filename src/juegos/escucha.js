@@ -15,6 +15,7 @@
 
 import { CANCION, CUMPLEANOS, fraseGusto, persona, pistaTerceraPersona, AVISOS } from '../datos.js';
 import { el, barajar, uno, elegirCon } from '../util.js';
+import { imagen } from '../dibujos.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;
@@ -58,7 +59,7 @@ function montarQueComida(ctx) {
 
   for (const c of cartas) {
     const btn = el('button', 'opcion',
-      `<span class="emoji">${c.emoji}</span><span class="pie">${c.en}</span>`,
+      `${imagen(c)}<span class="pie">${c.en}</span>`,
       { type: 'button', 'data-en': c.en });
 
     btn.addEventListener('click', () => {

@@ -12,6 +12,7 @@
 
 import { CUMPLEANOS, pistaDeError, AVISOS } from '../datos.js';
 import { el, barajar, uno, elegirCon } from '../util.js';
+import { imagen } from '../dibujos.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;
@@ -48,7 +49,7 @@ function montarEscuchaYElige(ctx, p) {
 
   for (const c of cartas) {
     const btn = el('button', 'opcion',
-      `<span class="emoji">${c.emoji}</span>`,
+      imagen(c),
       { type: 'button', 'data-en': c.en, 'aria-label': c.es });
 
     btn.addEventListener('click', () => {
@@ -80,7 +81,7 @@ function montarVeYElige(ctx, p) {
     textoIngles: p.en,
   });
 
-  const tarjeta = el('div', 'tarjeta-emoji', `<span class="emoji grande">${p.emoji}</span>`);
+  const tarjeta = el('div', 'tarjeta-emoji', imagen(p, true));
   ctx.zonaJuego.append(tarjeta);
 
   const cartas = barajar(elegirCon(CUMPLEANOS, p, 3));

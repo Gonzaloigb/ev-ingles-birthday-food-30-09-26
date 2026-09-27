@@ -15,6 +15,7 @@
 
 import { TODAS, PRIORITARIAS, ERRORES_REALES, palabra, pistaDeError, AVISOS } from '../datos.js';
 import { el, barajar, uno } from '../util.js';
+import { imagen } from '../dibujos.js';
 import { correrZona } from '../motor.js';
 
 const TOTAL = 10;
@@ -69,7 +70,7 @@ function montarEscribir(ctx, p) {
     mostrar: false,   // si se muestra, no es escribir: es copiar
   });
 
-  const tarjeta = el('div', 'tarjeta-emoji', `<span class="emoji grande">${p.emoji}</span>`);
+  const tarjeta = el('div', 'tarjeta-emoji', imagen(p, true));
   ctx.zonaJuego.append(tarjeta);
 
   const campo = el('input', 'campo', '', {

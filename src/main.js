@@ -13,6 +13,7 @@
 import './estilos.css';
 import { ZONAS, CUMPLEANOS } from './datos.js';
 import { el, pintarEstrellas } from './util.js';
+import { imagen } from './dibujos.js';
 import { despertarAudio, sonarToque } from './audio.js';
 import { iniciarVoz, hayVoz, nombreVoz } from './voz.js';
 import { legible } from './motor.js';
@@ -52,7 +53,7 @@ function verPortada() {
   const desfile = el('div', 'desfile');
   for (const c of CUMPLEANOS.slice(0, 6)) {
     const caja = el('div', 'muestra-palabra');
-    caja.innerHTML = `<span class="emoji">${c.emoji}</span>`;
+    caja.innerHTML = imagen(c);
     caja.append(el('span', '', c.en));
     desfile.append(caja);
   }

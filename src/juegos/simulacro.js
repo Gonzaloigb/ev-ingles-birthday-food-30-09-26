@@ -21,6 +21,7 @@ import {
   HAVE_YOU_GOT, fraseGusto, palabra, AVISOS,
 } from '../datos.js';
 import { el, barajar, uno, elegirCon } from '../util.js';
+import { imagen } from '../dibujos.js';
 import { correrZona } from '../motor.js';
 import { guardarSimulacro } from '../estado.js';
 
@@ -102,7 +103,7 @@ function preguntaVocab(ctx) {
 
   armar(ctx, {
     cartas: barajar(elegirCon(CUMPLEANOS, p, 4))
-      .map((c) => ({ html: `<span class="emoji">${c.emoji}</span>`, en: c.en })),
+      .map((c) => ({ html: imagen(c), en: c.en })),
     esCorrecta: (c) => c.en === p.en,
     clase: 'cuatro',
     palabra: p.en,
@@ -115,7 +116,7 @@ function preguntaOrigen(ctx) {
   const c = uno(COMIDAS);
   ctx.pedir({ instruccion: `${c.en} — ¿de dónde viene?`, textoIngles: c.en, mostrar: false });
 
-  const t = el('div', 'tarjeta-emoji', `<span class="emoji grande">${c.emoji}</span>`);
+  const t = el('div', 'tarjeta-emoji', imagen(c, true));
   ctx.zonaJuego.append(t);
 
   armar(ctx, {
@@ -190,7 +191,7 @@ function preguntaEscribir(ctx) {
 
   ctx.pedir({ instruccion: 'Escucha y escribe la palabra', textoIngles: p.en, mostrar: false });
 
-  const t = el('div', 'tarjeta-emoji', `<span class="emoji grande">${p.emoji}</span>`);
+  const t = el('div', 'tarjeta-emoji', imagen(p, true));
   ctx.zonaJuego.append(t);
 
   const campo = el('input', 'campo', '', {
