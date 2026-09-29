@@ -20,37 +20,46 @@ import {
   PERSONAS, persona, CUMPLEANOS, COMIDAS, fraseGusto,
   pistaTerceraPersona, AVISOS,
 } from '../datos.js';
-import { el, barajar, uno } from '../util.js';
+import { el, barajar, uno, bolsa } from '../util.js';
 import { correrZona } from '../motor.js';
 
-const TOTAL = 12;
+/* Ocho preguntas, no doce: los cuatro formatos dos veces. Doce era largo para
+   7 anos, y la regla se practica igual con ocho frases distintas. */
+const GUION = ['completar', 'bienomal', 'afirmneg', 'traducir',
+               'completar', 'bienomal', 'afirmneg', 'traducir'];
 
-/* Comidas que suenan bien en estas frases. */
-const COMIDAS_FRASE = [...CUMPLEANOS, ...COMIDAS]
+/* Comidas que suenan bien en estas frases, sin repetir (yoghurt y crisps
+   estan en las dos listas). */
+const COMIDAS_FRASE = [...new Set([...CUMPLEANOS, ...COMIDAS]
   .filter((c) => c.esComida !== false)
-  .map((c) => c.en);
+  .map((c) => c.en))];
 
 export function jugarGustos({ zona, onSalir, onFin, modo }) {
+  // Cada pregunta usa una comida distinta: la frase nunca se repite.
+  const sacarComida = bolsa(COMIDAS_FRASE);
+
   correrZona({
     zona,
-    total: TOTAL,
+    total: GUION.length,
     onSalir,
     onFin,
     modo,
     montar(ctx, i) {
-      const r = i % 4;
-      if (r === 0) montarCompletar(ctx);
-      else if (r === 1) montarBienOMal(ctx);
-      else if (r === 2) montarAfirmativoNegativo(ctx);
-      else montarTraducir(ctx);
+      const comida = sacarComida();
+      switch (GUION[i]) {
+        case 'completar': return montarCompletar(ctx, comida);
+        case 'bienomal': return montarBienOMal(ctx, comida);
+        case 'afirmneg': return montarAfirmativoNegativo(ctx, comida);
+        case 'traducir': return montarTraducir(ctx, comida);
+        default: throw new Error(`Formato desconocido: ${GUION[i]}`);
+      }
     },
   });
 }
 
 /* ---------- Formato A: completar el verbo ---------- */
-function montarCompletar(ctx) {
+function montarCompletar(ctx, comida) {
   const quien = uno(PERSONAS);
-  const comida = uno(COMIDAS_FRASE);
   const gusta = Math.random() < 0.6;
   const correcta = gusta ? quien.verbo : quien.negativo;
 
@@ -64,12 +73,18 @@ function montarCompletar(ctx) {
     `<b>${quien.sujeto}</b> <span class="hueco">?</span> <b>${comida}</b>.`);
   ctx.zonaJuego.append(hueco);
 
-  // Las cuatro formas posibles, para que tenga que elegir bien.
-  const todas = [...new Set([
-    quien.verbo, quien.negativo,
-    quien.id === 'I' ? 'likes' : 'like',
-    quien.id === 'I' ? "doesn't like" : "don't like",
-  ])];
+  // Normal: tres alternativas — la correcta, la contraria (gusta / no gusta)
+  // y la de la otra persona con el mismo sentido, que es el error de Marina
+  // ("He like"). Dificil: las cuatro formas.
+  const esYo = quien.id === 'I';
+  const opuesta = gusta ? quien.negativo : quien.verbo;
+  const otraPersona = gusta
+    ? (esYo ? 'likes' : 'like')
+    : (esYo ? "doesn't like" : "don't like");
+  const cuarta = gusta
+    ? (esYo ? "doesn't like" : "don't like")
+    : (esYo ? 'likes' : 'like');
+  const todas = [correcta, opuesta, otraPersona, cuarta].slice(0, ctx.opciones);
 
   const opciones = el('div', 'opciones dos');
   for (const texto of barajar(todas)) {
@@ -99,9 +114,8 @@ function montarCompletar(ctx) {
 
 /* ---------- Formato B: esta frase esta bien o mal escrita ----------
    El formato mas cercano a lo que le van a pedir en la prueba.            */
-function montarBienOMal(ctx) {
+function montarBienOMal(ctx, comida) {
   const quien = uno(PERSONAS.filter((p) => p.id !== 'I'));
-  const comida = uno(COMIDAS_FRASE);
   const gusta = Math.random() < 0.5;
   const mostrarMala = Math.random() < 0.5;
 
@@ -136,6 +150,10 @@ function montarBienOMal(ctx) {
 
       const acerto = op.v === !mostrarMala;
       btn.classList.add(acerto ? 'correcta' : 'errada');
+      // Dos opciones: si se equivoco, la otra es la correcta. Se marca en verde.
+      if (!acerto) {
+        [...opciones.children].find((o) => o !== btn)?.classList.add('correcta');
+      }
 
       ctx.responder({
         acerto,
@@ -158,16 +176,20 @@ function montarBienOMal(ctx) {
 }
 
 /* ---------- Formato C: afirmativo vs negativo ---------- */
-function montarAfirmativoNegativo(ctx) {
+function montarAfirmativoNegativo(ctx, comida) {
   const quien = uno(PERSONAS);
-  const comida = uno(COMIDAS_FRASE);
   const gusta = Math.random() < 0.5;
   const frase = fraseGusto(quien.id, comida, gusta);
 
   ctx.pedir({
-    instruccion: gusta
-      ? `¿Cómo se dice que a ${quien.es} le gusta ${comida}?`
-      : `¿Cómo se dice que a ${quien.es} NO le gusta ${comida}?`,
+    // Con "I" no se puede armar "a yo le gusta": se le pregunta a ella.
+    instruccion: quien.id === 'I'
+      ? (gusta
+        ? `¿Cómo dices que a ti te gusta ${comida}?`
+        : `¿Cómo dices que a ti NO te gusta ${comida}?`)
+      : (gusta
+        ? `¿Cómo se dice que a ${quien.es} le gusta ${comida}?`
+        : `¿Cómo se dice que a ${quien.es} NO le gusta ${comida}?`),
     textoIngles: frase,
     mostrar: false,
   });
@@ -212,9 +234,8 @@ function montarAfirmativoNegativo(ctx) {
 }
 
 /* ---------- Formato D: traducir del espanol ---------- */
-function montarTraducir(ctx) {
+function montarTraducir(ctx, comida) {
   const quien = uno(PERSONAS);
-  const comida = uno(COMIDAS_FRASE);
   const gusta = Math.random() < 0.5;
   const frase = fraseGusto(quien.id, comida, gusta);
 

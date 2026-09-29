@@ -42,10 +42,13 @@ export function correrZona(cfg) {
   // idea es medir, no ensenar. Pero tampoco quita vidas — perder el simulacro
   // a la tercera no ayuda a nadie.
   const ayuda = forzarDuro ? false : m.ayuda;
+  // Y el simulacro nunca quita vidas, tampoco en modo dificil. Antes se leia
+  // m.vidas directo, y en dificil el ensayo se cortaba al tercer error.
+  const maxVidas = forzarDuro ? 0 : m.vidas;
 
   let indice = 0;
   let aciertos = 0;
-  let vidas = m.vidas;
+  let vidas = maxVidas;
   const fallos = [];
 
   /* ---------- Estructura de la pantalla ---------- */
@@ -58,7 +61,7 @@ export function correrZona(cfg) {
   const progreso = el('div', 'progreso', '<i></i>');
   const marcaVidas = el('div', 'vidas');
   barra.append(btnVolver, titulo, progreso, contador);
-  if (m.vidas > 0) barra.append(marcaVidas);
+  if (maxVidas > 0) barra.append(marcaVidas);
 
   const tablero = el('div', 'tablero');
   const consigna = el('div', 'consigna');
@@ -80,7 +83,7 @@ export function correrZona(cfg) {
   });
 
   function pintarVidas() {
-    if (m.vidas <= 0) return;
+    if (maxVidas <= 0) return;
     marcaVidas.textContent = '❤️'.repeat(Math.max(0, vidas));
   }
 
@@ -142,6 +145,7 @@ export function correrZona(cfg) {
     /** Marca la respuesta y pasa a la siguiente pregunta. */
     async responder({ acerto, palabra, mensajeBien, mensajeMal, pista }) {
       if (palabra) registrar(palabra, acerto);
+      let seguir = null;
 
       if (acerto) {
         aciertos += 1;
@@ -176,6 +180,15 @@ export function correrZona(cfg) {
         // y en el simulacro se calla, porque ahi la idea es medir.
         if (pista && ayuda) aviso.append(el('span', 'pista', pista));   // admite HTML
 
+        // En modo normal, el error espera a que ella toque "Entendido". Antes la
+        // explicacion duraba 2,9 segundos: a los 7 anos no alcanza a leerse,
+        // y sin leerla el error se repite.
+        if (ayuda) {
+          seguir = el('button', 'btn-chico destacado btn-seguir', 'Entendido ➜',
+            { type: 'button' });
+          aviso.append(seguir);
+        }
+
         // En celular el aviso nace al pie y puede quedar bajo la linea de
         // flotacion: una pista que no se ve no ensena nada. Se trae a la vista.
         if (aviso.getBoundingClientRect().bottom > window.innerHeight) {
@@ -183,14 +196,19 @@ export function correrZona(cfg) {
         }
       }
 
-      // Un error necesita mas tiempo en pantalla: hay que alcanzar a leer la razon.
-      await esperar(acerto ? 1100 : (ayuda ? 2900 : 1100));
+      if (seguir) {
+        // Con foco, para que en el computador baste con Enter.
+        seguir.focus({ preventScroll: true });
+        await new Promise((listo) => seguir.addEventListener('click', listo, { once: true }));
+      } else {
+        await esperar(1100);
+      }
       aviso.className = 'aviso';
       aviso.replaceChildren();
       pantalla.classList.remove('con-pista');
 
       // Modo dificil: sin vidas, la zona vuelve a empezar.
-      if (m.vidas > 0 && vidas <= 0) return sinVidas();
+      if (maxVidas > 0 && vidas <= 0) return sinVidas();
 
       indice += 1;
       siguiente();
@@ -216,7 +234,7 @@ export function correrZona(cfg) {
     indice = 0;
     aciertos = 0;
     racha.romper();
-    vidas = m.vidas;
+    vidas = maxVidas;
     fallos.length = 0;
     raiz.replaceChildren(pantalla);
     tablero.replaceChildren(consigna, zonaJuego, aviso);
@@ -263,7 +281,7 @@ export function correrZona(cfg) {
       el('div', 'puntaje', `${aciertos} de ${total} correctas`),
     );
 
-    if (m.vidas > 0 && bien) {
+    if (maxVidas > 0 && bien) {
       fiesta.append(el('div', 'sello-duro', '🔥 En modo difícil'));
     }
 

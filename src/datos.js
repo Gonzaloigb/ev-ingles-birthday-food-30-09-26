@@ -25,13 +25,19 @@
 export const CUMPLEANOS = [
   { en: 'pizza', es: 'pizza', emoji: '🍕', esComida: true },
   { en: 'sausages', es: 'salchichas', emoji: '🌭', esComida: true },
-  { en: 'yoghurt', es: 'yogur', emoji: '🍦', esComida: true },
+  // 🥣 y no 🍦: el helado es un DISTRACTOR del ejercicio auditivo de la p.44
+  // (3a y 6a). En el libro el yogur es un pote con cuchara. Con 🍦, Marina
+  // aprenderia a marcar el helado cuando escuche "yoghurt".
+  { en: 'yoghurt', es: 'yogur', emoji: '🥣', esComida: true },
   { en: 'cherries', es: 'cerezas', emoji: '🍒', esComida: true },
   { en: 'popcorn', es: 'palomitas', emoji: '🍿', esComida: true },
   { en: 'crisps', es: 'papas fritas de bolsa', emoji: '🍟', esComida: true },  // no 🥔: ese es potatoes
   { en: 'water', es: 'agua', emoji: '💧', esComida: true },
-  // No es comida: es el "objeto" que nombra el temario.
-  { en: 'birthday card', es: 'tarjeta de cumpleaños', emoji: '💌', esComida: false },
+  // No es comida: es el "objeto" que nombra el temario. En una frase va en
+  // plural, como en la cancion: "He likes birthday cards" (p.39). Sin esto el
+  // juego decia "He likes birthday card", que esta mal.
+  { en: 'birthday card', enFrase: 'birthday cards', es: 'tarjeta de cumpleaños',
+    emoji: '💌', esComida: false },
 ];
 
 /* =========================================================================
@@ -45,7 +51,7 @@ export const COMIDAS = [
   { en: 'milk', es: 'leche', emoji: '🥛', de: 'animals' },
   { en: 'cheese', es: 'queso', emoji: '🧀', de: 'animals' },
   { en: 'eggs', es: 'huevos', emoji: '🥚', de: 'animals' },
-  { en: 'yoghurt', es: 'yogur', emoji: '🍦', de: 'animals' },
+  { en: 'yoghurt', es: 'yogur', emoji: '🥣', de: 'animals' },
   { en: 'apples', es: 'manzanas', emoji: '🍎', de: 'plants' },
   { en: 'bread', es: 'pan', emoji: '🍞', de: 'plants' },
   { en: 'orange juice', es: 'jugo de naranja', emoji: '🧃', de: 'plants' },
@@ -124,16 +130,23 @@ export function fraseGusto(personaId, comida, gusta) {
     : `${p.sujeto} ${p.negativo} ${comida}.`;
 }
 
-/** La cancion de la p.39 — fuente literal del ejercicio auditivo. */
+/**
+ * La cancion de la p.39 — fuente literal del ejercicio auditivo.
+ *
+ * Corregida el 28-09-2026 contra la foto del libro: la version anterior tenia
+ * cambiados cherries y crisps entre el y ella. Es "HE likes popcorn and he
+ * likes CHERRIES" y "SHE likes water and she likes CRISPS". La ultima linea,
+ * "We like birthdays. Yeah!", no entra: el temario no trabaja "we".
+ */
 export const CANCION = [
   { persona: 'he', gusta: true, comida: 'birthdays' },
   { persona: 'he', gusta: true, comida: 'birthday cards' },
   { persona: 'he', gusta: false, comida: 'crisps' },
   { persona: 'he', gusta: false, comida: 'sausages' },
-  { persona: 'she', gusta: true, comida: 'water' },
-  { persona: 'she', gusta: true, comida: 'cherries' },
   { persona: 'he', gusta: true, comida: 'popcorn' },
-  { persona: 'he', gusta: true, comida: 'crisps' },
+  { persona: 'he', gusta: true, comida: 'cherries' },
+  { persona: 'she', gusta: true, comida: 'water' },
+  { persona: 'she', gusta: true, comida: 'crisps' },
   { persona: 'she', gusta: false, comida: 'pizza' },
   { persona: 'she', gusta: false, comida: 'popcorn' },
   { persona: 'she', gusta: true, comida: 'yoghurt' },

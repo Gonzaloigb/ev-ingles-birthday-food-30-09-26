@@ -97,8 +97,20 @@ def jugar_zona(page, zona_id, donde, preguntas=4):
             if caja and caja["y"] + caja["height"] > alto + 2:
                 fallo(donde, f"pregunta {n + 1}: el aviso del error cae fuera de pantalla")
 
-        # Esperar a que el motor pase a la siguiente
-        page.wait_for_timeout(3100)
+        # Modo normal: tras un error, el motor espera el boton "Entendido".
+        # Tiene que quedar a la vista, o la zona se queda pegada.
+        seguir = page.query_selector(".btn-seguir")
+        if seguir:
+            page.wait_for_timeout(500)   # el scroll suave hacia el aviso
+            caja = seguir.bounding_box()
+            alto = page.evaluate("window.innerHeight")
+            if not caja or caja["y"] + caja["height"] > alto + 2:
+                fallo(donde, f"pregunta {n + 1}: el boton Entendido cae fuera de pantalla")
+            seguir.click()
+            page.wait_for_timeout(300)
+        else:
+            # Esperar a que el motor pase a la siguiente
+            page.wait_for_timeout(1400)
 
     return "ok"
 

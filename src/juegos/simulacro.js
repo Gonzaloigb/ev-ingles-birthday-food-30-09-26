@@ -11,37 +11,49 @@
  *
  * El reparto sigue los cuatro puntos del temario, con mas peso en lo que Marina
  * falla de verdad:
- *   4 vocabulario de cumpleanos · 3 comidas y su origen ·
- *   2 Have you got (ya lo domina) · 4 likes/dislikes (su error real) ·
+ *   2 vocabulario de cumpleanos · 2 comidas y su origen ·
+ *   1 Have you got (ya lo domina) · 3 likes/dislikes (su error real) ·
  *   2 escribir
+ *
+ * Diez preguntas y no quince, cada tipo con su bolsa: nada se repite en el
+ * mismo ensayo (antes podia salir dos veces la misma palabra).
  */
 
 import {
   CUMPLEANOS, COMIDAS, OLLA, ORIGENES, PERSONAS, PRIORITARIAS,
   HAVE_YOU_GOT, fraseGusto, palabra, AVISOS,
 } from '../datos.js';
-import { el, barajar, uno, elegirCon, imagen } from '../util.js';
+import { el, barajar, uno, elegirCon, imagen, bolsa } from '../util.js';
 import { correrZona } from '../motor.js';
 import { guardarSimulacro } from '../estado.js';
 
-const TOTAL = 15;
-
-const COMIDAS_FRASE = [...CUMPLEANOS, ...COMIDAS]
+const COMIDAS_FRASE = [...new Set([...CUMPLEANOS, ...COMIDAS]
   .filter((c) => c.esComida !== false)
-  .map((c) => c.en);
+  .map((c) => c.en))];
+
+/* Lo que se puede preguntar con "Have you got…?" sin romper el ingles: la
+   olla (a pot ya trae su articulo) y la comida del cumpleanos. La tarjeta
+   no: "Have you got birthday card?" esta mal. */
+const PARA_HAVE_YOU_GOT = [...OLLA, ...CUMPLEANOS.filter((c) => c.esComida)].map((c) => c.en);
 
 export function jugarSimulacro({ zona, onSalir, onFin, modo }) {
   const guion = barajar([
-    'vocab', 'vocab', 'vocab', 'vocab',
-    'origen', 'origen', 'origen',
-    'haveyougot', 'haveyougot',
-    'gustos', 'gustos', 'gustos', 'gustos',
+    'vocab', 'vocab',
+    'origen', 'origen',
+    'haveyougot',
+    'gustos', 'gustos', 'gustos',
     'escribir', 'escribir',
   ]);
 
+  const sacarVocab = bolsa(CUMPLEANOS);
+  const sacarOrigen = bolsa(COMIDAS);
+  const sacarHave = bolsa(PARA_HAVE_YOU_GOT);
+  const sacarComida = bolsa(COMIDAS_FRASE);
+  const sacarEscribir = bolsa(PRIORITARIAS);
+
   correrZona({
     zona,
-    total: TOTAL,
+    total: guion.length,
     onSalir,
     modo,
     forzarDuro: true,
@@ -51,11 +63,11 @@ export function jugarSimulacro({ zona, onSalir, onFin, modo }) {
     },
     montar(ctx, i) {
       switch (guion[i]) {
-        case 'vocab': return preguntaVocab(ctx);
-        case 'origen': return preguntaOrigen(ctx);
-        case 'haveyougot': return preguntaHaveYouGot(ctx);
-        case 'gustos': return preguntaGustos(ctx);
-        case 'escribir': return preguntaEscribir(ctx);
+        case 'vocab': return preguntaVocab(ctx, sacarVocab());
+        case 'origen': return preguntaOrigen(ctx, sacarOrigen());
+        case 'haveyougot': return preguntaHaveYouGot(ctx, sacarHave());
+        case 'gustos': return preguntaGustos(ctx, sacarComida());
+        case 'escribir': return preguntaEscribir(ctx, palabra(sacarEscribir()));
         default: throw new Error(`Pregunta desconocida: ${guion[i]}`);
       }
     },
@@ -96,8 +108,7 @@ function armar(ctx, { cartas, esCorrecta, clase = 'tres', palabra: pal, mensajeM
 }
 
 /* ---------- 1. Vocabulario de cumpleanos ---------- */
-function preguntaVocab(ctx) {
-  const p = uno(CUMPLEANOS);
+function preguntaVocab(ctx, p) {
   ctx.pedir({ instruccion: 'Escucha y toca la imagen correcta', textoIngles: p.en, mostrar: false });
 
   armar(ctx, {
@@ -111,8 +122,7 @@ function preguntaVocab(ctx) {
 }
 
 /* ---------- 2. Food from animals / plants ---------- */
-function preguntaOrigen(ctx) {
-  const c = uno(COMIDAS);
+function preguntaOrigen(ctx, c) {
   ctx.pedir({ instruccion: `${c.en} — ¿de dónde viene?`, textoIngles: c.en, mostrar: false });
 
   const t = el('div', 'tarjeta-emoji', imagen(c, true));
@@ -131,8 +141,7 @@ function preguntaOrigen(ctx) {
 }
 
 /* ---------- 3. Have you got…? ---------- */
-function preguntaHaveYouGot(ctx) {
-  const comida = uno([...OLLA, ...CUMPLEANOS]).en;
+function preguntaHaveYouGot(ctx, comida) {
   const tiene = Math.random() < 0.5;
   const pregunta = HAVE_YOU_GOT.pregunta(comida);
 
@@ -157,9 +166,8 @@ function preguntaHaveYouGot(ctx) {
 }
 
 /* ---------- 4. Likes / dislikes: el error real ---------- */
-function preguntaGustos(ctx) {
+function preguntaGustos(ctx, comida) {
   const quien = uno(PERSONAS);
-  const comida = uno(COMIDAS_FRASE);
   const gusta = Math.random() < 0.5;
   const frase = fraseGusto(quien.id, comida, gusta);
   const correcta = gusta ? quien.verbo : quien.negativo;
@@ -185,8 +193,7 @@ function preguntaGustos(ctx) {
 }
 
 /* ---------- 5. Escribir ---------- */
-function preguntaEscribir(ctx) {
-  const p = palabra(uno(PRIORITARIAS));
+function preguntaEscribir(ctx, p) {
 
   ctx.pedir({ instruccion: 'Escucha y escribe la palabra', textoIngles: p.en, mostrar: false });
 

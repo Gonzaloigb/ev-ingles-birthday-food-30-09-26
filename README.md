@@ -40,12 +40,21 @@ npm install
 npm run dev      # servidor con recarga en vivo
 npm run build    # compila a dist/index.html, en UN solo archivo
 python verificar.py --todos   # prueba de humo en WebKit y Chromium
+python probar_preguntas.py    # que no se repitan preguntas y sean de 2° básico
+python probar_preguntas.py --celular   # lo mismo en WebKit a 360px
 ```
+
+`probar_preguntas.py` juega cada zona varias vueltas y falla si una pregunta se
+repite en la misma vuelta, si una alternativa es demasiado larga, si el modo
+normal ofrece más de 3 alternativas, si algo desborda a lo ancho o si el botón
+"Entendido" queda fuera de pantalla. Además escribe `preguntas.txt` con todas
+las preguntas y su respuesta, para revisarlas contra las fotos del libro.
 
 El build produce un único HTML autocontenido a propósito, para que funcione al
 abrirlo con doble clic (`file://`), donde los navegadores bloquean los módulos ES.
 
-`verificar.py` **no comprueba el audio**: los navegadores automatizados no
-exponen voces. Eso se prueba a mano, con `probar-voz.bat`.
+Ninguna de las dos **comprueba el audio**: los navegadores automatizados no
+exponen voces (`probar_preguntas.py` usa una voz muda que solo anota lo que se
+le pidió decir). Que suene en inglés se prueba a mano, con `probar-voz.bat`.
 
 Se publica solo en cada push a `master`.

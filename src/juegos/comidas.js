@@ -7,36 +7,43 @@
  * Incluye tambien los ingredientes de la olla (p.42), porque el punto 2 del
  * temario dice "vocabulario de diferentes comidas" y son las dos listas.
  *
- * Tres formatos:
+ * Cinco formatos:
  *   A. De donde viene esta comida: animals o plants.
  *   B. Suena la palabra → elige la imagen.
  *   C. De estas tres, cual es food from animals/plants.
+ *   D. Los ingredientes de la olla (p.42).
+ *   E. Have you got…? con la bolsa (p.42).
+ *
+ * Ocho preguntas, cada formato con su bolsa: ninguna se repite en la vuelta.
  */
 
-import { COMIDAS, OLLA, ORIGENES, pistaDeError, AVISOS } from '../datos.js';
-import { el, barajar, uno, elegirCon, imagen } from '../util.js';
+import { COMIDAS, OLLA, ORIGENES, HAVE_YOU_GOT, pistaDeError, AVISOS } from '../datos.js';
+import { el, barajar, uno, elegirCon, imagen, bolsa } from '../util.js';
 import { correrZona } from '../motor.js';
 
-const TOTAL = 10;
+const GUION = ['origen', 'escucha', 'cual', 'olla', 'origen', 'escucha', 'haveyougot', 'origen'];
 
 export function jugarComidas({ zona, onSalir, onFin, modo }) {
-  let bolsa = [];
-  const sacar = () => {
-    if (!bolsa.length) bolsa = barajar(COMIDAS);
-    return bolsa.pop();
-  };
+  const sacarOrigen = bolsa(COMIDAS);
+  const sacarEscucha = bolsa(COMIDAS);
+  const sacarOlla = bolsa(OLLA);
+  const sacarPregunta = bolsa(OLLA);
 
   correrZona({
     zona,
-    total: TOTAL,
+    total: GUION.length,
     onSalir,
     onFin,
     modo,
     montar(ctx, i) {
-      if (i === 3 || i === 8) montarOlla(ctx);
-      else if (i % 3 === 1) montarEscucha(ctx, sacar());
-      else if (i % 3 === 2) montarCualEs(ctx);
-      else montarDeDondeViene(ctx, sacar());
+      switch (GUION[i]) {
+        case 'origen': return montarDeDondeViene(ctx, sacarOrigen());
+        case 'escucha': return montarEscucha(ctx, sacarEscucha());
+        case 'cual': return montarCualEs(ctx);
+        case 'olla': return montarOlla(ctx, sacarOlla());
+        case 'haveyougot': return montarHaveYouGot(ctx, sacarPregunta());
+        default: throw new Error(`Formato desconocido: ${GUION[i]}`);
+      }
     },
   });
 }
@@ -159,17 +166,16 @@ function montarCualEs(ctx) {
 /* ---------- Los ingredientes de la olla (p.42) ----------
    Aqui esta `potatoes`, el unico plural con -es de la unidad, y `a pot`, que
    es el unico con articulo.                                                 */
-function montarOlla(ctx) {
-  const c = uno(OLLA);
-
+function montarOlla(ctx, c) {
   ctx.pedir({
     instruccion: 'Escucha: ¿cuál es?',
     textoIngles: c.en,
     apoyo: 'Son los ingredientes de la olla: mushrooms, onions, potatoes, a pot.',
   });
 
-  const cartas = barajar(OLLA);
-  const opciones = el('div', 'opciones cuatro');
+  // Normal: tres alternativas. Dificil: las cuatro.
+  const cartas = elegirCon(OLLA, c, ctx.opciones);
+  const opciones = el('div', `opciones ${cartas.length === 4 ? 'cuatro' : 'tres'}`);
 
   for (const x of cartas) {
     const btn = el('button', 'opcion',
@@ -190,6 +196,58 @@ function montarOlla(ctx) {
         mensajeBien: uno(AVISOS.bien),
         mensajeMal: `Era <b>${c.en}</b> (${c.es}).`,
         pista: pistaDeError(x.en, c.en),
+      });
+    });
+    opciones.append(btn);
+  }
+  ctx.zonaJuego.append(opciones);
+}
+
+/* ---------- Have you got…? con la bolsa (p.42) ----------
+   El ejercicio del libro: dibujar dos cosas en la bolsa y responder
+   "Have you got onions?" con Yes, I have / No, I haven't.
+
+   Es el punto 3 del temario. Marina ya lo domina (lo escribio bien 4 veces),
+   por eso sale UNA vez por vuelta y no tiene zona propia. Pero tiene que
+   estar: si solo apareciera en el ensayo, el ensayo mediria algo que ninguna
+   zona practica.                                                            */
+function montarHaveYouGot(ctx, c) {
+  const loTiene = Math.random() < 0.5;
+  const otros = barajar(OLLA.filter((x) => x !== c));
+  const enBolsa = loTiene ? barajar([c, otros[0]]) : otros.slice(0, 2);
+  const correcta = loTiene ? HAVE_YOU_GOT.si : HAVE_YOU_GOT.no;
+
+  ctx.pedir({
+    instruccion: 'Mira tu bolsa y responde',
+    textoIngles: HAVE_YOU_GOT.pregunta(c.en),
+    apoyo: "Si está en la bolsa: Yes, I have. Si no está: No, I haven't.",
+  });
+
+  ctx.zonaJuego.append(el('div', 'tarjeta-emoji bolsa',
+    `<span class="emoji">🛍️</span>${enBolsa.map((x) => imagen(x)).join('')}`));
+
+  const opciones = el('div', 'opciones dos');
+  for (const texto of [HAVE_YOU_GOT.si, HAVE_YOU_GOT.no]) {
+    const btn = el('button', 'opcion solo-texto', texto, { type: 'button' });
+
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('bloqueada')) return;
+      [...opciones.children].forEach((o) => o.classList.add('bloqueada'));
+
+      const acerto = texto === correcta;
+      btn.classList.add(acerto ? 'correcta' : 'errada');
+      if (!acerto) {
+        [...opciones.children].find((o) => o !== btn)?.classList.add('correcta');
+      }
+
+      ctx.responder({
+        acerto,
+        palabra: 'have-you-got',
+        mensajeBien: uno(AVISOS.bien),
+        mensajeMal: `Era: <b>${correcta}</b>`,
+        pista: loTiene
+          ? `<b>${c.en}</b> está en la bolsa: <b>${HAVE_YOU_GOT.si}</b>`
+          : `<b>${c.en}</b> no está en la bolsa: <b>${HAVE_YOU_GOT.no}</b>`,
       });
     });
     opciones.append(btn);

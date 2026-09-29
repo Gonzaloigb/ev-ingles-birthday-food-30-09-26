@@ -527,6 +527,9 @@ input { font-family: inherit; }
 }
 .aviso.bien { color: #0B7A5A; animation: brincar .45s; }
 .aviso.mal { color: #A81C1C; }
+/* Tras un error en modo normal: la pista espera a que ella decida seguir. */
+.aviso .btn-seguir { margin-top: 4px; }
+
 .aviso .pista {
   font-size: clamp(14px, 1.9vw, 17px);
   font-weight: 700;
@@ -861,6 +864,9 @@ input { font-family: inherit; }
   display: grid;
   place-items: center;
 }
+
+/* La bolsa de "Have you got…?": la bolsa y lo que hay dentro, en fila. */
+.tarjeta-emoji.bolsa { display: flex; gap: 10px; align-items: center; }
 
 /* Frase con un hueco que completar */
 .frase-hueco {
@@ -1227,7 +1233,7 @@ input { font-family: inherit; }
 
   /* --- Aviso y pista: tienen que caber, es donde se explica el error --- */
   .aviso { font-size: 17px; max-width: 100%; }
-  .aviso .pista { font-size: 13.5px; padding: 7px 12px; line-height: 1.4; }
+  .aviso .pista { font-size: 15px; padding: 8px 12px; line-height: 1.4; }
 
   /* --- Final de zona --- */
   .fiesta { gap: 11px; padding: 12px 0; }

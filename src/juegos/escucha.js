@@ -11,41 +11,44 @@
  *   A. Suena "He likes pizza" → marca la cara y la comida.
  *   B. Suena una frase de la cancion → le gusta o no le gusta.
  *   C. Suena una frase → de quien habla: he o she.
+ *
+ * Ocho preguntas. Las comidas salen de una bolsa y las lineas de la cancion
+ * de otra: ninguna se repite en la vuelta.
  */
 
 import { CANCION, CUMPLEANOS, fraseGusto, persona, pistaTerceraPersona, AVISOS } from '../datos.js';
-import { el, barajar, uno, elegirCon, imagen } from '../util.js';
+import { el, barajar, uno, elegirCon, imagen, bolsa } from '../util.js';
 import { correrZona } from '../motor.js';
 
-const TOTAL = 10;
+const GUION = ['comida', 'gusta', 'quien', 'comida', 'gusta', 'quien', 'comida', 'gusta'];
 
 export function jugarEscucha({ zona, onSalir, onFin, modo }) {
-  let bolsa = [];
-  const sacar = () => {
-    if (!bolsa.length) bolsa = barajar(CANCION);
-    return bolsa.pop();
-  };
+  const sacarLinea = bolsa(CANCION);
+  const sacarComida = bolsa(CUMPLEANOS);
 
   correrZona({
     zona,
-    total: TOTAL,
+    total: GUION.length,
     onSalir,
     onFin,
     modo,
     montar(ctx, i) {
-      if (i % 3 === 1) montarGustaONo(ctx, sacar());
-      else if (i % 3 === 2) montarQuienEs(ctx, sacar());
-      else montarQueComida(ctx);
+      switch (GUION[i]) {
+        case 'comida': return montarQueComida(ctx, sacarComida());
+        case 'gusta': return montarGustaONo(ctx, sacarLinea());
+        case 'quien': return montarQuienEs(ctx, sacarLinea());
+        default: throw new Error(`Formato desconocido: ${GUION[i]}`);
+      }
     },
   });
 }
 
 /* ---------- Formato A: suena la frase, cual comida nombra ---------- */
-function montarQueComida(ctx) {
-  const p = uno(CUMPLEANOS);
+function montarQueComida(ctx, p) {
   const quien = uno(['he', 'she']);
   const gusta = Math.random() < 0.6;
-  const frase = fraseGusto(quien, p.en, gusta);
+  // "He likes birthday cards", en plural como en la cancion: no "birthday card".
+  const frase = fraseGusto(quien, p.enFrase || p.en, gusta);
 
   ctx.pedir({
     instruccion: 'Escucha. ¿De qué comida habla?',
@@ -106,6 +109,10 @@ function montarGustaONo(ctx, linea) {
 
       const acerto = op.v === linea.gusta;
       btn.classList.add(acerto ? 'correcta' : 'errada');
+      // Dos opciones: si se equivoco, la otra es la correcta. Se marca en verde.
+      if (!acerto) {
+        [...opciones.children].find((o) => o !== btn)?.classList.add('correcta');
+      }
 
       ctx.responder({
         acerto,

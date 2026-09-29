@@ -1,3 +1,6 @@
 # Lo regenerable, y solo lo regenerable.
 # Ojo: dist/ NO se ignora — es lo que GitHub Pages publica.
 node_modules/
+# Catalogo que genera probar_preguntas.py en cada corrida.
+preguntas.txt
+__pycache__/

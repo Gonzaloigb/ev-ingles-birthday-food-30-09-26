@@ -11,17 +11,16 @@
  */
 
 import { CUMPLEANOS, pistaDeError, AVISOS } from '../datos.js';
-import { el, barajar, uno, elegirCon, imagen } from '../util.js';
+import { el, barajar, uno, elegirCon, imagen, bolsa } from '../util.js';
 import { correrZona } from '../motor.js';
 
-const TOTAL = 10;
+// Ocho preguntas para ocho palabras: cada una sale UNA vez por vuelta, la
+// mitad para escucharla y la mitad para reconocerla escrita. Antes eran diez,
+// y dos palabras se repetian siempre.
+const TOTAL = CUMPLEANOS.length;
 
 export function jugarVocabulario({ zona, onSalir, onFin, modo }) {
-  let bolsa = [];
-  const sacar = () => {
-    if (!bolsa.length) bolsa = barajar(CUMPLEANOS);
-    return bolsa.pop();
-  };
+  const sacar = bolsa(CUMPLEANOS);
 
   correrZona({
     zona,

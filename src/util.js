@@ -33,6 +33,20 @@ export function barajar(lista) {
 }
 
 /**
+ * Saca elementos al azar SIN repetir hasta agotar la lista; recien ahi vuelve
+ * a barajar. Es lo que evita que la misma pregunta salga dos veces en una
+ * vuelta de la zona: con `uno()` el azar repite, y con temarios chicos repite
+ * mucho (regla del proyecto, ver CLAUDE.md).
+ */
+export function bolsa(lista) {
+  let resto = [];
+  return () => {
+    if (!resto.length) resto = barajar(lista);
+    return resto.pop();
+  };
+}
+
+/**
  * Elige n elementos distintos de una lista, siempre incluyendo `obligatorio`.
  * Se usa para armar las alternativas: la correcta mas distractores.
  */

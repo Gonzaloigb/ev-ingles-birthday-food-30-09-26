@@ -7,7 +7,8 @@
  *
  * El guion NO es al azar: sale de contar los errores reales de Marina en su
  * libro. `crisps` lo escribio de 4 formas distintas y ninguna correcta;
- * `yoghurt` 3 veces, tampoco. Esas salen mas.
+ * `yoghurt` 3 veces, tampoco. Las siete que fallo salen SIEMPRE, mas una
+ * del resto; ninguna se repite en la vuelta (antes podian salir dos veces).
  *
  * Al fallar, la pista es primero la REGLA de esa palabra (pistaDeError) y, si
  * no hay regla que aplique, la comparacion letra por letra.
@@ -17,7 +18,7 @@ import { TODAS, PRIORITARIAS, ERRORES_REALES, palabra, pistaDeError, AVISOS } fr
 import { el, barajar, uno, imagen } from '../util.js';
 import { correrZona } from '../motor.js';
 
-const TOTAL = 10;
+const TOTAL = 8;
 
 /** Quita acentos, espacios de sobra y mayusculas. */
 function limpiar(t) {
@@ -44,11 +45,12 @@ function esSuError(escrito, esperado) {
 }
 
 export function jugarEscribir({ zona, onSalir, onFin, modo }) {
-  // Las que fallo en el libro salen primero y mas veces.
+  // Las que fallo en el libro, todas, y del resto las que falten para 8.
+  const resto = TODAS.map((p) => p.en).filter((en) => !PRIORITARIAS.includes(en));
   const guion = barajar([
     ...PRIORITARIAS,
-    ...barajar(TODAS.map((p) => p.en)).slice(0, 3),
-  ]).slice(0, TOTAL);
+    ...barajar(resto).slice(0, TOTAL - PRIORITARIAS.length),
+  ]);
 
   correrZona({
     zona,
