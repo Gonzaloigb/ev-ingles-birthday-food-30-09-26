@@ -150,7 +150,10 @@ def jugar_vuelta(page, zi, titulo, catalogo, apariciones):
 
         seguir = page.query_selector(".btn-seguir")
         if seguir:
-            page.clock.run_for(800)   # el scroll suave hacia el aviso
+            # El scroll suave hacia el aviso lo anima el navegador en tiempo
+            # REAL, no con el reloj de mentira: hay que esperarlo de verdad.
+            page.clock.run_for(800)
+            page.wait_for_timeout(700)
             caja = seguir.bounding_box()
             if not caja or caja["y"] + caja["height"] > page.viewport_size["height"] + 2:
                 problemas.append(f"{titulo}: el boton Entendido queda fuera de pantalla en: {firma}")
